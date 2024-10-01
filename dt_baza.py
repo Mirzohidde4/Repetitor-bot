@@ -64,7 +64,8 @@ def CreateTableBool():
                 gruppa INTEGER NOT NULL,
                 status BOOLEAN NOT NULL,
                 narx INTEGER NOT NULL,
-                sana INTEGER NOT NULL
+                sana INTEGER NOT NULL,
+                malumot BOOLEAN NOT NULL
             ); """
         cursor.execute(create_table)
         conn.commit()
@@ -116,15 +117,15 @@ def AdminCard(photo, number, name):
 # AdminCard('https://avatars.mds.yandex.net/i?id=bdb3d43628f5588e30bbb991bf9fb01eb5e08d61-5666974-images-thumbs&n=13', 1111222233334444, 'Mirzohid')
 
 
-def OylikStatus(user, user_id, gruppa, status, narx, sana):
+def OylikStatus(user, user_id, gruppa, status, narx, sana, malumot):
     if sql_connect() == True:
         try:
             conn = sql_connection()
             cursor = conn.cursor()
 
             cursor.execute(
-                """INSERT INTO Oylik (user, user_id, gruppa, status, narx, sana) VALUES (?, ?, ?, ?, ?, ?)""",
-                (user, user_id, gruppa, status, narx, sana),
+                """INSERT INTO Oylik (user, user_id, gruppa, status, narx, sana, malumot) VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (user, user_id, gruppa, status, narx, sana, malumot),
             )
             conn.commit()
             return True

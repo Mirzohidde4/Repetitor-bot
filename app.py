@@ -19,8 +19,8 @@ bot = Bot(token=AdminDb[2], default=DefaultBotProperties(parse_mode=ParseMode.HT
 dp = Dispatcher()
 
 
-async def EslatmaXabarYuborish(malumot, user_id, name, response, group):
-    if malumot:
+async def EslatmaXabarYuborish(user_id, name, response, group):
+    if (info[6] for info in ReadDb('Oylik') if (info[1] == user_id and info[2] == response)) != 0: #ishlamadi
         while True:
             today = datetime.now()
             if today.day == 1:
@@ -52,7 +52,7 @@ async def EslatmaXabarYuborish(malumot, user_id, name, response, group):
                         else:
                             print(user_status.status, type(user_status.status))   
                         break  
-                    son += 1       
+                    soni += 1       
                     await asyncio.sleep(40)    
             await asyncio.sleep(120)        
 
@@ -74,6 +74,7 @@ async def EslatmaXabarYuborish(malumot, user_id, name, response, group):
                 except Exception as e:
                     print(f"Sheetsdan ochirishda xatolik: {e}")
                 print("Ma'lumot muvaffaqiyatli o'chirildi" if action.status_code == 200 else f"Sheets ochirishda xato: {action.status_code}")
+                await bot.send_message(user_id, "Ma'lumotlaringiz bekor qilindi.")
                 break
             son += 1       
             await asyncio.sleep(40)
@@ -258,7 +259,7 @@ async def Maqsad(call: CallbackQuery, state: FSMContext):
                 act = False
         if act:    
             try:
-                OylikStatus(name, user_id, group, False, AdminDb[9], 0)
+                OylikStatus(name, user_id, group, False, AdminDb[9], 0, False)
             except Exception as e:
                 print(f"Bazaga qoshishda xatolik: {e}")
 
@@ -268,7 +269,7 @@ async def Maqsad(call: CallbackQuery, state: FSMContext):
         response = (AdminDb[6] if group == '1' else AdminDb[7] if group == '2' else AdminDb[8] if group == '3' else False)
         await asyncio.sleep(20)
         if response:
-            asyncio.create_task(EslatmaXabarYuborish((False if act else True), user_id, name, int(group), response))
+            asyncio.create_task(EslatmaXabarYuborish(user_id, name, int(group), response))
         else:
             print("Gruppa IDsi topilmadi")
     else:
@@ -343,6 +344,8 @@ async def Accept(call: CallbackQuery, state: FSMContext):
         
         for member in ReadDb('Oylik'):
             if (member[1] == int(user_id)) and (member[2] == int(sheetgroup)):
+                if member[6] == 0:
+                    UpdateOylik('malumot', 1, user_id, int(sheetgroup)) #tekshirilmagan
                 UpdateOylik('status', True, user_id, int(sheetgroup))
                 UpdateOylik('sana', int(sana), user_id, int(sheetgroup))
                 break
