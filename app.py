@@ -82,7 +82,7 @@ async def Start(message: Message, state: FSMContext):
                     Assalomu alaykum, hurmatli <b>{fulname}</b>. Jalol Boltayevning onlayn kursida o'qimoqchimisiz? Men ustoz Jalol Boltayevning yordamchi botiman! 😎🤖
 Ism-familiya, telefon raqami kabi ba'zi ma'lumotlaringizni yozib olishim kerak. Bu juda qisqa vaqt oladi. Keyin sizga yopiq guruhning havolasini yuboraman.
                 """)
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
             await message.answer(
                 text="""
                     Demak, boshladik.
@@ -240,7 +240,7 @@ async def Maqsad(call: CallbackQuery, state: FSMContext):
             except Exception as e:
                 print(f"Bazaga qoshishda xatolik: {e}")
 
-        await call.message.answer(text="Ma'lumotlaringiz qabul qilindi.\nTolovni amalga oshiring.",
+        await call.message.answer(text="Ma'lumotlaringiz qabul qilindi.\nEndi to'lovni amalga oshiring.",
             reply_markup=CreateInline({"💵 To'lov qilish": f"tolov_qilish_{name}_{int(group)}"}, just=1))
         await state.set_state(Info.tolov)
         await asyncio.sleep(20)
@@ -267,7 +267,7 @@ async def Tolov(call: CallbackQuery, state: FSMContext):
                 if (member[1] == user_id) and (member[2] == int(gr)):
                     if member[3] == 0:
                         await call.message.answer_photo(photo=CardTable[0], 
-                            caption=f"{CardTable[2]}: {CardTable[1]}\n\nTo'lovni amalga oshirib, chekini yuboring! (skrinshot yuborsangiz ham bo'ladi). Kurs narxi <b>[guruh_narxi]</b> so'm.")
+                            caption=f"{CardTable[2]}: {CardTable[1]}\n\nTo'lovni amalga oshirib, chekini yuboring! (skrinshot yuborsangiz ham bo'ladi). Kurs narxi [<b>{AdminDb[9]} 000</b>] so'm.")
                         await state.set_state(Pay.screen)
                     else:
                         await call.message.answer(text="Siz bu oy uchun to'lov qilgansiz.")
@@ -290,7 +290,7 @@ async def Screenshot(message: Message, state: FSMContext):
                 if (member[1] == user_id) and (member[2] == int(sheetgroup)):
                     sendpay = await message.answer(text="Rahmat! To'lovingiz Jalol Boltayevga yuborildi. Jalol Boltayev to'lovni tasdiqlagach, sizga guruh linkini yuboraman! Havotir olmang! To'lovingiz tez orada tasdiqlanadi (bu 10 daqiqadan 6 soatgacha vaqt olishi mumkin. Jalol ustoz ishda bo'lsalar kechroq tasdiqlab yuboradi).")
                     await bot.send_photo(
-                        chat_id=AdminDb[0], photo=message.photo[-1].file_id, caption=f"{user} kurs to'lovini amalga oshirdi.\nQabul qilasizmi?",
+                        chat_id=AdminDb[0], photo=message.photo[-1].file_id, caption=f"<b>{user}</b> kurs to'lovini amalga oshirdi.\nQabul qilasizmi?",
                         reply_markup=CreateInline({"✅ Ha": f'qabul_xa_{user_id}_{sheetgroup}_{sendpay.message_id}', "❌ Yo'q": f'qabul_yoq_{user_id}_{sheetgroup}_{sendpay.message_id}'}, just=2))
         else:
             await message.answer(text="Siz ro'yhatdan o'tmagansiz.")    
@@ -338,10 +338,10 @@ async def Accept(call: CallbackQuery, state: FSMContext):
         try:
             expire_date = timedelta(minutes=5)
             invite_link: ChatInviteLink = await bot.create_chat_invite_link(chat_id=group_id, expire_date=expire_date, member_limit=1)
-            await call.message.answer(text=f"➕ <b>Guruhga qo'shilishingiz mumkin.\nHavola 5 daqiqadan keyin yaroqsiz bo'ladi.</b>\n\n{invite_link.invite_link}")
+            await bot.send_message(chat_id=user_id, text=f"➕ <b>Guruhga qo'shilishingiz mumkin.\nHavola 5 daqiqadan keyin yaroqsiz bo'ladi.</b>\n\n{invite_link.invite_link}")
 
         except Exception as e:
-            await logging.error(f"Havola yaratishda xatolik: {str(e)}")    
+            print(f"Havola yaratishda xatolik: {str(e)}")    
     
     elif action == "yoq":
         await bot.delete_message(chat_id=user_id, message_id=sendpay)
@@ -349,14 +349,13 @@ async def Accept(call: CallbackQuery, state: FSMContext):
     await state.clear()
 
 
-@dp.message(F.chat.type == 'group', F.new_chat_members)
+@dp.message(F.chat.type == 'supergroup', F.new_chat_members)
 async def NewMember(message: Message):
     new_members = message.new_chat_members
     group = message.chat.id
     response = (1 if group == AdminDb[6] else 2 if group == AdminDb[7] else 3 if group == AdminDb[8] else False)    
     
     for member in new_members:
-        print(member.full_name)
         await message.delete()
         user_id = member.id
         action = True
@@ -376,10 +375,9 @@ async def NewMember(message: Message):
                 print(user_status.status)
 
 
-@dp.message(F.chat.type == "group", F.left_chat_member)
+@dp.message(F.chat.type == "supergroup", F.left_chat_member)
 async def LeftMember(message: Message):
     if message.left_chat_member:
-        print(message.left_chat_member.full_name)
         user_id = message.left_chat_member.id
         user_url = message.left_chat_member.url
         group_id = message.chat.id
@@ -401,6 +399,7 @@ async def Tozalash(call: CallbackQuery):
     sheets = (AdminDb[3] if group == '1' else AdminDb[4] if group == '2' else AdminDb[5] if group == '3' else False)
  
     if action == 'xa':
+        await call.message.delete()
         try:
             DeleteOylik(int(user_id), int(group))
         except Exception as e:
@@ -412,6 +411,8 @@ async def Tozalash(call: CallbackQuery):
             print(f"Sheetsdan ochirishda xatolik: {e}")
         print("Ma'lumot muvaffaqiyatli o'chirildi" if action.status_code == 200 else f"Sheets ochirishda xato: {action.status_code}")
         await call.message.delete()
+    elif action == 'yoq':
+        pass
 
 
 async def main():

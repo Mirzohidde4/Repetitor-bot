@@ -30,7 +30,8 @@ def CreateTableAPI():
                 api_3 TEXT NOT NULL,
                 group_1 BIGINT NOT NULL,
                 group_2 BIGINT NOT NULL,
-                group_3 BIGINT NOT NULL
+                group_3 BIGINT NOT NULL,
+                price INTEGER NOT NULL
             ); """
         cursor.execute(create_table)
         conn.commit()
@@ -69,15 +70,15 @@ def CreateTableBool():
         return False  
 
 
-def Admin(id, username, token, api_1, api_2, api_3, group_1, group_2, group_3):
+def Admin(id, username, token, api_1, api_2, api_3, group_1, group_2, group_3, price):
     if sql_connect() == True:
         try:
             conn = sql_connection()
             cursor = conn.cursor()
 
             cursor.execute(
-                """INSERT INTO Admin (id, username, token, api_1, api_2, api_3, group_1, group_2, group_3) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (id, username, token, api_1, api_2, api_3, group_1, group_2, group_3),
+                """INSERT INTO Admin (id, username, token, api_1, api_2, api_3, group_1, group_2, group_3, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (id, username, token, api_1, api_2, api_3, group_1, group_2, group_3, price),
             )
             conn.commit()
             return True
@@ -88,7 +89,7 @@ def Admin(id, username, token, api_1, api_2, api_3, group_1, group_2, group_3):
             conn.close()
     else:
         return False
-# Admin(795303467, 'https://t.me/xudoybergan0v', '6842270549:AAEVq-VSV96HcbKmrHuTWwqIB-d4Q2cbUZQ', 'https://sheetdb.io/api/v1/6l88e9ljvile7', 'https://sheetdb.io/api/v1/y2cl3rwvjwc9e', 'https://sheetdb.io/api/v1/y2cl3rwvjwc9e', -4504435403, -4579819207, -4591173539)
+# Admin(795303467, 'https://t.me/xudoybergan0v', '6842270549:AAEVq-VSV96HcbKmrHuTWwqIB-d4Q2cbUZQ', 'https://sheetdb.io/api/v1/6l88e9ljvile7', 'https://sheetdb.io/api/v1/y2cl3rwvjwc9e', 'https://sheetdb.io/api/v1/y2cl3rwvjwc9e', -4504435403, -4579819207, -4591173539, 100)
     
 
 def AdminCard(photo, number, name):
