@@ -14,3 +14,7 @@
 
 # await bot.set_chat_permissions(chat_id=chat_id, can_invite_users=False)
 
+import datetime
+today = datetime.datetime.now()
+
+print(today.day)

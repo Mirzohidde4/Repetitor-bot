@@ -62,7 +62,9 @@ def CreateTableBool():
                 user TEXT NOT NULL,
                 user_id BIGINT NOT NULL,
                 gruppa INTEGER NOT NULL,
-                status BOOLEAN NOT NULL
+                status BOOLEAN NOT NULL,
+                narx INTEGER NOT NULL,
+                sana INTEGER NOT NULL
             ); """
         cursor.execute(create_table)
         conn.commit()
@@ -114,15 +116,15 @@ def AdminCard(photo, number, name):
 # AdminCard('https://avatars.mds.yandex.net/i?id=bdb3d43628f5588e30bbb991bf9fb01eb5e08d61-5666974-images-thumbs&n=13', 1111222233334444, 'Mirzohid')
 
 
-def OylikStatus(user, user_id, gruppa, status):
+def OylikStatus(user, user_id, gruppa, status, narx, sana):
     if sql_connect() == True:
         try:
             conn = sql_connection()
             cursor = conn.cursor()
 
             cursor.execute(
-                """INSERT INTO Oylik (user, user_id, gruppa, status) VALUES (?, ?, ?, ?)""",
-                (user, user_id, gruppa, status),
+                """INSERT INTO Oylik (user, user_id, gruppa, status, narx, sana) VALUES (?, ?, ?, ?, ?, ?)""",
+                (user, user_id, gruppa, status, narx, sana),
             )
             conn.commit()
             return True
@@ -153,11 +155,11 @@ def ReadDb(table):
         return False
 
 
-def ReadUserStatus(user_id):
+def ReadUserStatus(user_id, gruppa):
     if sql_connect() == True:
         conn = sql_connection()
         cursor = conn.cursor()
-        cursor.execute(f"SELECT status FROM Oylik WHERE user_id = ?", (user_id,))
+        cursor.execute(f"SELECT status FROM Oylik WHERE user_id = ? AND gruppa = ?", (user_id, gruppa))
 
         res = cursor.fetchone()
         conn.close()
@@ -165,13 +167,13 @@ def ReadUserStatus(user_id):
     return False 
  
 
-def UpdateOylik(status, user_id, group):
+def UpdateOylik(argument, status, user_id, group):
     try:
         with sqlite3.connect("db.sqlite3") as con:
             cur = con.cursor()
-            cur.execute("UPDATE Oylik SET status = ? WHERE user_id = ? AND gruppa = ?", (status, user_id, group))
+            cur.execute(f"UPDATE Oylik SET {argument} = ? WHERE user_id = ? AND gruppa = ?", (status, user_id, group))
             con.commit()
-            print(f"Updated status for user_id: {user_id} in group: {group}")  # Logging
+            print(f"Updated {argument} for user_id: {user_id} in group: {group}")  # Logging
             return True
     except sqlite3.Error as err:
         print(f"SQLite Error: {err}")  # Error logging

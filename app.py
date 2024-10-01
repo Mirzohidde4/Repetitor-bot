@@ -20,40 +20,63 @@ dp = Dispatcher()
 
 
 async def EslatmaXabarYuborish(malumot, user_id, name, response, group):
-    son = 1
-    while not ReadUserStatus(user_id):
-        if son <= 3:
-            await bot.send_message(user_id, text="Siz hali to'lovni amalga oshirmadingiz. Iltimos, to'lov qiling!",
-                reply_markup=CreateInline({"💵 To'lov qilish": f"tolov_qilish_{name}_{response}"}, just=1))
-        else:
-            try:
-                DeleteOylik(int(user_id), int(response))
-            except Exception as e:
-                print(f"Oylik ochirishda xatolik: {e}")
+    if malumot:
+        while True:
+            today = datetime.now()
+            if today.day == 1:
+                soni = 1
+                while not ReadUserStatus(user_id, response):
+                    if soni <= 3:
+                        await bot.send_message(chat_id=user_id, text="Oylik to'lovni amalga oshiring", 
+                            reply_markup=CreateInline({"💵 To'lov qilish": f"tolov_qilish_{name}_{response}"}, just=1))
+                    else:
+                        try:
+                            DeleteOylik(int(user_id), int(response))
+                        except Exception as e:
+                            print(f"Oylik ochirishda xatolik: {e}")
 
-            sheets = (AdminDb[3] if response == 1 else AdminDb[4] if response == 2 else AdminDb[5] if response == 3 else False)
-            try:
-                action = requests.delete(f"{sheets}/telegram%20id/{str(user_id)}")
-            except Exception as e:
-                print(f"Sheetsdan ochirishda xatolik: {e}")
-            print("Ma'lumot muvaffaqiyatli o'chirildi" if action.status_code == 200 else f"Sheets ochirishda xato: {action.status_code}")
+                        sheets = (AdminDb[3] if response == 1 else AdminDb[4] if response == 2 else AdminDb[5] if response == 3 else False)
+                        try:
+                            action = requests.delete(f"{sheets}/telegram%20id/{str(user_id)}")
+                        except Exception as e:
+                            print(f"Sheetsdan ochirishda xatolik: {e}")
+                        print("Ma'lumot muvaffaqiyatli o'chirildi" if action.status_code == 200 else f"Sheets ochirishda xato: {action.status_code}")
 
-            if malumot:
-                user_status = await bot.get_chat_member(group, user_id)
-                if user_status.status not in ['creator', 'administrator']:
-                    try:
-                        await bot.ban_chat_member(group, user_id)
-                        await bot.send_message(user_id, text="To'lovni amalga oshirmaganingiz uchun siz gurugdan chetlatildingiz.") 
-                    except Exception as e:
-                        print(f"user chiqarishda xatolik: {e}")        
-                else:
-                    print(user_status.status, type(user_status.status))   
-                break  
+                        user_status = await bot.get_chat_member(group, user_id)
+                        if user_status.status not in ['creator', 'administrator']:
+                            try:
+                                await bot.ban_chat_member(group, user_id)
+                                await bot.send_message(user_id, text="To'lovni amalga oshirmaganingiz uchun siz gurugdan chetlatildingiz.") 
+                            except Exception as e:
+                                print(f"user chiqarishda xatolik: {e}")        
+                        else:
+                            print(user_status.status, type(user_status.status))   
+                        break  
+                    son += 1       
+                    await asyncio.sleep(40)    
+            await asyncio.sleep(120)        
+
+    else:
+        son = 1
+        while not ReadUserStatus(user_id, response): 
+            if son <= 3:
+                await bot.send_message(user_id, text="Siz hali to'lovni amalga oshirmadingiz. Iltimos, to'lov qiling!",
+                    reply_markup=CreateInline({"💵 To'lov qilish": f"tolov_qilish_{name}_{response}"}, just=1))
             else:
-                await bot.send_message(user_id, text="Ma'lumotlaringiz bekor qilindi.") 
-            break
-        son += 1       
-        await asyncio.sleep(40)
+                try:
+                    DeleteOylik(int(user_id), int(response))
+                except Exception as e:
+                    print(f"Oylik ochirishda xatolik: {e}")
+
+                sheets = (AdminDb[3] if response == 1 else AdminDb[4] if response == 2 else AdminDb[5] if response == 3 else False)
+                try:
+                    action = requests.delete(f"{sheets}/telegram%20id/{str(user_id)}")
+                except Exception as e:
+                    print(f"Sheetsdan ochirishda xatolik: {e}")
+                print("Ma'lumot muvaffaqiyatli o'chirildi" if action.status_code == 200 else f"Sheets ochirishda xato: {action.status_code}")
+                break
+            son += 1       
+            await asyncio.sleep(40)
 
 
 @dp.message(CommandStart())
@@ -233,18 +256,17 @@ async def Maqsad(call: CallbackQuery, state: FSMContext):
             if any((human[1] == int(user_id) and human[2] == int(group)) for human in ReadDb('Oylik')):
                 print('Already exits')
                 act = False
-
         if act:    
             try:
-                OylikStatus(name, user_id, group, False)
+                OylikStatus(name, user_id, group, False, AdminDb[9], 0)
             except Exception as e:
                 print(f"Bazaga qoshishda xatolik: {e}")
 
         await call.message.answer(text="Ma'lumotlaringiz qabul qilindi.\nEndi to'lovni amalga oshiring.",
             reply_markup=CreateInline({"💵 To'lov qilish": f"tolov_qilish_{name}_{int(group)}"}, just=1))
         await state.set_state(Info.tolov)
-        await asyncio.sleep(20)
         response = (AdminDb[6] if group == '1' else AdminDb[7] if group == '2' else AdminDb[8] if group == '3' else False)
+        await asyncio.sleep(20)
         if response:
             asyncio.create_task(EslatmaXabarYuborish((False if act else True), user_id, name, int(group), response))
         else:
@@ -267,7 +289,7 @@ async def Tolov(call: CallbackQuery, state: FSMContext):
                 if (member[1] == user_id) and (member[2] == int(gr)):
                     if member[3] == 0:
                         await call.message.answer_photo(photo=CardTable[0], 
-                            caption=f"{CardTable[2]}: {CardTable[1]}\n\nTo'lovni amalga oshirib, chekini yuboring! (skrinshot yuborsangiz ham bo'ladi). Kurs narxi [<b>{AdminDb[9]} 000</b>] so'm.")
+                            caption=f"{CardTable[2]}: {CardTable[1]}\n\nTo'lovni amalga oshirib, chekini yuboring! (skrinshot yuborsangiz ham bo'ladi). Kurs narxi [<b>{member[4]} 000</b>] so'm.")
                         await state.set_state(Pay.screen)
                     else:
                         await call.message.answer(text="Siz bu oy uchun to'lov qilgansiz.")
@@ -283,6 +305,8 @@ async def Screenshot(message: Message, state: FSMContext):
     user = data.get('userpay')
     sheetgroup = data.get('sheetgroup')
     user_id = message.from_user.id
+    today = datetime.now()
+    print(today)
 
     if message.photo:
         if ReadDb('Oylik'):
@@ -291,7 +315,7 @@ async def Screenshot(message: Message, state: FSMContext):
                     sendpay = await message.answer(text="Rahmat! To'lovingiz Jalol Boltayevga yuborildi. Jalol Boltayev to'lovni tasdiqlagach, sizga guruh linkini yuboraman! Havotir olmang! To'lovingiz tez orada tasdiqlanadi (bu 10 daqiqadan 6 soatgacha vaqt olishi mumkin. Jalol ustoz ishda bo'lsalar kechroq tasdiqlab yuboradi).")
                     await bot.send_photo(
                         chat_id=AdminDb[0], photo=message.photo[-1].file_id, caption=f"<b>{user}</b> kurs to'lovini amalga oshirdi.\nQabul qilasizmi?",
-                        reply_markup=CreateInline({"✅ Ha": f'qabul_xa_{user_id}_{sheetgroup}_{sendpay.message_id}', "❌ Yo'q": f'qabul_yoq_{user_id}_{sheetgroup}_{sendpay.message_id}'}, just=2))
+                        reply_markup=CreateInline({"✅ Ha": f'qabul_xa_{user_id}_{sheetgroup}_{sendpay.message_id}_{today.day}', "❌ Yo'q": f'qabul_yoq_{user_id}_{sheetgroup}_{sendpay.message_id}_{today.day}'}, just=2))
         else:
             await message.answer(text="Siz ro'yhatdan o'tmagansiz.")    
     else:
@@ -305,6 +329,7 @@ async def Accept(call: CallbackQuery, state: FSMContext):
     user_id = call.data.split('_')[2]
     sheetgroup = call.data.split('_')[3]
     sendpay = call.data.split('_')[4]
+    sana = call.data.split('_')[5]
     await call.message.delete()
 
     if action == "xa":
@@ -318,7 +343,8 @@ async def Accept(call: CallbackQuery, state: FSMContext):
         
         for member in ReadDb('Oylik'):
             if (member[1] == int(user_id)) and (member[2] == int(sheetgroup)):
-                UpdateOylik(True, user_id, int(sheetgroup))
+                UpdateOylik('status', True, user_id, int(sheetgroup))
+                UpdateOylik('sana', int(sana), user_id, int(sheetgroup))
                 break
 
         if response:
@@ -336,8 +362,8 @@ async def Accept(call: CallbackQuery, state: FSMContext):
                 
         group_id = (AdminDb[6] if sheetgroup == '1' else AdminDb[7] if sheetgroup == '2' else AdminDb[8] if sheetgroup == '3' else False)
         try:
-            expire_date = timedelta(minutes=5)
-            invite_link: ChatInviteLink = await bot.create_chat_invite_link(chat_id=group_id, expire_date=expire_date, member_limit=1)
+            # expire_date = timedelta(minutes=5)
+            invite_link: ChatInviteLink = await bot.create_chat_invite_link(chat_id=group_id, expire_date=None, member_limit=1)
             await bot.send_message(chat_id=user_id, text=f"➕ <b>Guruhga qo'shilishingiz mumkin.\nHavola 5 daqiqadan keyin yaroqsiz bo'ladi.</b>\n\n{invite_link.invite_link}")
 
         except Exception as e:
