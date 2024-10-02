@@ -20,10 +20,17 @@ dp = Dispatcher()
 
 
 async def EslatmaXabarYuborish(user_id, name, response, group):
-    if (info[6] for info in ReadDb('Oylik') if (info[1] == user_id and info[2] == response)) != 0: #ishlamadi
-        while True:
+    while True:
+        for i in ReadDb('Oylik'):
+            if i[1] == int(user_id) and i[2] == int(response):
+                malumot = i[6]
+        print(malumot)
+        if int(malumot) == 1:
             today = datetime.now()
-            if today.day == 1:
+            if today.day == 2:
+                for aziz in ReadDb('Oylik'):
+                    UpdateOylik('status', False, aziz[1], aziz[2])
+
                 soni = 1
                 while not ReadUserStatus(user_id, response):
                     if soni <= 3:
@@ -53,31 +60,30 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
                             print(user_status.status, type(user_status.status))   
                         break  
                     soni += 1       
-                    await asyncio.sleep(40)    
-            await asyncio.sleep(120)        
+                    await asyncio.sleep(40)          
+        else:
+            son = 1
+            while not ReadUserStatus(user_id, response): 
+                if son <= 3:
+                    await bot.send_message(user_id, text="Siz hali to'lovni amalga oshirmadingiz. Iltimos, to'lov qiling!",
+                        reply_markup=CreateInline({"💵 To'lov qilish": f"tolov_qilish_{name}_{response}"}, just=1))
+                else:
+                    try:
+                        DeleteOylik(int(user_id), int(response))
+                    except Exception as e:
+                        print(f"Oylik ochirishda xatolik: {e}")
 
-    else:
-        son = 1
-        while not ReadUserStatus(user_id, response): 
-            if son <= 3:
-                await bot.send_message(user_id, text="Siz hali to'lovni amalga oshirmadingiz. Iltimos, to'lov qiling!",
-                    reply_markup=CreateInline({"💵 To'lov qilish": f"tolov_qilish_{name}_{response}"}, just=1))
-            else:
-                try:
-                    DeleteOylik(int(user_id), int(response))
-                except Exception as e:
-                    print(f"Oylik ochirishda xatolik: {e}")
-
-                sheets = (AdminDb[3] if response == 1 else AdminDb[4] if response == 2 else AdminDb[5] if response == 3 else False)
-                try:
-                    action = requests.delete(f"{sheets}/telegram%20id/{str(user_id)}")
-                except Exception as e:
-                    print(f"Sheetsdan ochirishda xatolik: {e}")
-                print("Ma'lumot muvaffaqiyatli o'chirildi" if action.status_code == 200 else f"Sheets ochirishda xato: {action.status_code}")
-                await bot.send_message(user_id, "Ma'lumotlaringiz bekor qilindi.")
-                break
-            son += 1       
-            await asyncio.sleep(40)
+                    sheets = (AdminDb[3] if response == 1 else AdminDb[4] if response == 2 else AdminDb[5] if response == 3 else False)
+                    try:
+                        action = requests.delete(f"{sheets}/telegram%20id/{str(user_id)}")
+                    except Exception as e:
+                        print(f"Sheetsdan ochirishda xatolik: {e}")
+                    print("Ma'lumot muvaffaqiyatli o'chirildi" if action.status_code == 200 else f"Sheets ochirishda xato: {action.status_code}")
+                    await bot.send_message(user_id, "Ma'lumotlaringiz bekor qilindi.")
+                    break
+                son += 1       
+                await asyncio.sleep(40)
+        await asyncio.sleep(60)  
 
 
 @dp.message(CommandStart())
@@ -345,7 +351,7 @@ async def Accept(call: CallbackQuery, state: FSMContext):
         for member in ReadDb('Oylik'):
             if (member[1] == int(user_id)) and (member[2] == int(sheetgroup)):
                 if member[6] == 0:
-                    UpdateOylik('malumot', 1, user_id, int(sheetgroup)) #tekshirilmagan
+                    UpdateOylik('malumot', True, user_id, int(sheetgroup)) #tekshirilmagan
                 UpdateOylik('status', True, user_id, int(sheetgroup))
                 UpdateOylik('sana', int(sana), user_id, int(sheetgroup))
                 break

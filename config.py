@@ -14,7 +14,14 @@
 
 # await bot.set_chat_permissions(chat_id=chat_id, can_invite_users=False)
 
-import datetime
-today = datetime.datetime.now()
+# from dt_baza import ReadDb
+# user_id = 795303467
+# group = 2
 
-print(today.day)
+# for i in ReadDb('Oylik'):
+#     if i[1] == int(user_id) and i[2] == int(group):
+#         malumot = i[6]
+#     #     print(i[6])        
+#     # else:
+#     #    print('not')
+# print(malumot)
