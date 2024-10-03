@@ -14,14 +14,23 @@
 
 # await bot.set_chat_permissions(chat_id=chat_id, can_invite_users=False)
 
+# import calendar, requests
+# from datetime import datetime
 # from dt_baza import ReadDb
-# user_id = 795303467
-# group = 2
 
-# for i in ReadDb('Oylik'):
-#     if i[1] == int(user_id) and i[2] == int(group):
-#         malumot = i[6]
-#     #     print(i[6])        
-#     # else:
-#     #    print('not')
-# print(malumot)
+# current_month = datetime.now().month
+# print(current_month, type(current_month))
+
+# # # Joriy sanani olish
+# today = datetime.now()
+
+# # Joriy oyda nechta kun borligini aniqlash
+# # oylik_sana = calendar.monthrange(today.year, today.month)[1]
+# oylik_sana = 31
+# # kunlar = today.day
+# kunlar = 7
+# kunlar_soni = oylik_sana - kunlar
+# narx = (100 * kunlar_soni) / oylik_sana
+
+# # print(oylik_sana, kunlar, kunlar_soni)
+# print(int(narx))
