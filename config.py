@@ -18,8 +18,6 @@
 # from datetime import datetime
 # from dt_baza import ReadDb
 
-# current_month = datetime.now().month
-# print(current_month, type(current_month))
 
 # # # Joriy sanani olish
 # today = datetime.now()

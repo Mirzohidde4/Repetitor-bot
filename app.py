@@ -423,7 +423,7 @@ async def Accept(call: CallbackQuery, state: FSMContext):
     await state.clear()
 
 
-@dp.message(F.chat.type == 'supergroup', F.new_chat_members)
+@dp.message(F.chat.type == 'supergroup', F.new_chat_members) 
 async def NewMember(message: Message):
     new_members = message.new_chat_members
     group = message.chat.id
@@ -449,7 +449,7 @@ async def NewMember(message: Message):
                 print(user_status.status)
 
 
-@dp.message(F.chat.type == "supergroup", F.left_chat_member)
+@dp.message(F.chat.type == "supergroup", F.left_chat_member) #tekshirish kerak
 async def LeftMember(message: Message):
     if message.left_chat_member:
         user_id = message.left_chat_member.id
