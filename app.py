@@ -30,7 +30,7 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
 
         if int(malumot) == 1:
             today = datetime.now()
-            if today.day == 4:  # oyning 1-kuni bolishi kerak
+            if today.day == 1: 
                 for aziz in ReadDb('Oylik'):
                     if aziz[1] == int(user_id) and i[2] == int(response):
                         if aziz[5] >= 29: 
