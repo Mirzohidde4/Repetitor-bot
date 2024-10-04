@@ -21,23 +21,29 @@ dp = Dispatcher()
 
 async def EslatmaXabarYuborish(user_id, name, response, group):
     while True:
-        for i in ReadDb('Oylik'):
-            if i[1] == int(user_id) and i[2] == response:
-                malumot = i[6]
-        print(malumot)
+        if ReadDb('Oylik'):
+            for i in ReadDb('Oylik'):
+                if i[1] == int(user_id) and i[2] == response:
+                    malumot = i[6]
+        else:
+            malumot = 0            
+
         if int(malumot) == 1:
             today = datetime.now()
-            if today.day == 3:  # oyning 1-kuni bolishi kerak
+            if today.day == 4:  # oyning 1-kuni bolishi kerak
                 for aziz in ReadDb('Oylik'):
                     if aziz[1] == int(user_id) and i[2] == int(response):
                         if aziz[5] >= 29: #tekshirilmagan
                             oy = datetime.now().month
+                            print(oy)
                             if (oy - aziz[7]) > 1:
                                 try:
                                     UpdateOylik('status', False, aziz[1], aziz[2])
                                     UpdateOylik('narx', 100, aziz[1], aziz[2])
                                 except Exception as e:
                                     print(f"Xatolik: {e}")
+                            else:
+                                print("Skidka")        
                         else:
                             if aziz[5] <= 5:
                                 try:
@@ -365,6 +371,16 @@ async def Screenshot(message: Message, state: FSMContext):
                         reply_markup=CreateInline({"✅ Ha": f'qabul_xa_{user_id}_{sheetgroup}_{sendpay.message_id}_{today.day}', "❌ Yo'q": f'qabul_yoq_{user_id}_{sheetgroup}_{sendpay.message_id}_{today.day}'}, just=2))
         else:
             await message.answer(text="Siz ro'yhatdan o'tmagansiz.")    
+    
+    elif message.document:
+        if message.document.mime_type in ("application/pdf", "image/jpeg", "image/png"):        
+            if ReadDb('Oylik'): 
+                for member in ReadDb('Oylik'):
+                    if (member[1] == user_id) and (member[2] == int(sheetgroup)):
+                        sendpay = await message.answer(text="Rahmat! To'lovingiz Jalol Boltayevga yuborildi. Jalol Boltayev to'lovni tasdiqlagach, sizga guruh linkini yuboraman! Havotir olmang! To'lovingiz tez orada tasdiqlanadi (bu 10 daqiqadan 6 soatgacha vaqt olishi mumkin. Jalol ustoz ishda bo'lsalar kechroq tasdiqlab yuboradi).")
+                        await bot.send_document(chat_id=AdminDb[0], document=f"{message.document.file_id}", caption=f"<b>{user}</b> kurs to'lovini amalga oshirdi.\nQabul qilasizmi?",
+                            reply_markup=CreateInline({"✅ Ha": f'qabul_xa_{user_id}_{sheetgroup}_{sendpay.message_id}_{today.day}', "❌ Yo'q": f'qabul_yoq_{user_id}_{sheetgroup}_{sendpay.message_id}_{today.day}'}, just=2))
+    
     else:
         await message.answer_photo(photo=CardTable[0],caption=f"{CardTable[2]}: {CardTable[1]}\n\nTo'lovni amalga oshirib screenshotini yuboring.")
         await state.set_state(Pay.screen)    
