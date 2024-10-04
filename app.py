@@ -175,7 +175,8 @@ Iltimos, familiya-ismingizni yozing (diqqat! dastlab familiya, keyin ismingizni 
             await state.update_data({'date': date})
             await state.set_state(Info.name)
     else:
-        await message.answer(text="😊 <b>Assalomu alaykm botdan foydalanish uchun adminga yuzlaning.</b>", reply_markup=CreateInline({'👤 Admin': AdminDb[1]}, just=1))
+        await message.answer(text="😊 <b>Assalomu alaykum <b>Jalol Boltaevning</b> botiga xush kelibsiz.</b>")
+        # await message.answer(text="😊 <b>Assalomu alaykm botdan foydalanish uchun adminga yuzlaning.</b>", reply_markup=CreateInline({'👤 Admin': AdminDb[1]}, just=1))
 
 
 @dp.message(Info.name)
