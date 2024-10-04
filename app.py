@@ -35,7 +35,14 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
                     if aziz[1] == int(user_id) and i[2] == int(response):
                         if aziz[5] >= 29: 
                             oy = datetime.now().month
-                            if (oy - aziz[7]) > 1:
+                            if (aziz[7] == 12) and (oy == 2):
+                                try:
+                                    UpdateOylik('status', False, aziz[1], aziz[2])
+                                    UpdateOylik('narx', 100, aziz[1], aziz[2])
+                                except Exception as e:
+                                    print(f"Xatolik: {e}")
+                            
+                            elif (oy - aziz[7]) > 1:
                                 try:
                                     UpdateOylik('status', False, aziz[1], aziz[2])
                                     UpdateOylik('narx', 100, aziz[1], aziz[2])
@@ -475,7 +482,7 @@ async def LeftMember(message: Message):
         if ReadDb('Oylik'):
             for user in ReadDb('Oylik'):
                 if (user[1] == user_id) and (user[2] == response):
-                    await bot.send_message(chat_id=AdminDb[0], text=f"Foydalanuvchi <a href='{user_url}'>{user[0]}</a> {response}-guruhni tark etdi. Ma'lumotlarini tozalaymi?",
+                    await bot.send_message(chat_id=AdminDb[0], text=f"Foydalanuvchi <a href='{user_url}'><b>{user[0]}</b></a> {response}-guruhni tark etdi. Ma'lumotlarini tozalaymi?",
                     reply_markup=CreateInline({"✅ Xa": f"tozalash_xa_{user_id}_{response}", "❌ Yo'q": f"tozalash_yoq_{user_id}_{response}"}, just=2))
         await message.delete()
 
@@ -503,6 +510,7 @@ async def Tozalash(call: CallbackQuery):
         await call.message.delete()
     
     elif action == 'yoq':
+        await call.message.delete()
         try:
             # expire_date = timedelta(minutes=5)
             invite_link: ChatInviteLink = await bot.create_chat_invite_link(chat_id=group_id, expire_date=None, member_limit=1)
