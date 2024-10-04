@@ -33,9 +33,8 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
             if today.day == 4:  # oyning 1-kuni bolishi kerak
                 for aziz in ReadDb('Oylik'):
                     if aziz[1] == int(user_id) and i[2] == int(response):
-                        if aziz[5] >= 29: #tekshirilmagan
+                        if aziz[5] >= 29: 
                             oy = datetime.now().month
-                            print(oy)
                             if (oy - aziz[7]) > 1:
                                 try:
                                     UpdateOylik('status', False, aziz[1], aziz[2])
@@ -439,7 +438,7 @@ async def Accept(call: CallbackQuery, state: FSMContext):
     await state.clear()
 
 
-@dp.message(F.chat.type == 'supergroup', F.new_chat_members) 
+@dp.message(F.new_chat_members) 
 async def NewMember(message: Message):
     new_members = message.new_chat_members
     group = message.chat.id
@@ -465,7 +464,7 @@ async def NewMember(message: Message):
                 print(user_status.status)
 
 
-@dp.message(F.chat.type == "supergroup", F.left_chat_member) #tekshirish kerak
+@dp.message(F.left_chat_member)
 async def LeftMember(message: Message):
     if message.left_chat_member:
         user_id = message.left_chat_member.id
@@ -503,7 +502,7 @@ async def Tozalash(call: CallbackQuery):
         print("Ma'lumot muvaffaqiyatli o'chirildi" if action.status_code == 200 else f"Sheets ochirishda xato: {action.status_code}")
         await call.message.delete()
     
-    elif action == 'yoq':   # tekshirilmagan 
+    elif action == 'yoq':
         try:
             # expire_date = timedelta(minutes=5)
             invite_link: ChatInviteLink = await bot.create_chat_invite_link(chat_id=group_id, expire_date=None, member_limit=1)
