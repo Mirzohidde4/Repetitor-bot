@@ -80,7 +80,7 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
                                             else:
                                                 print(f"Sheets ozgartirishda xato: {response_sheets.status_code}")             
                 
-                soni = 1
+                soni = 5
                 while not ReadUserStatus(user_id, response):
                     if soni <= 3:
                         await bot.send_message(chat_id=user_id, text="Oylik to'lovni amalga oshiring", 
@@ -109,10 +109,10 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
                             print(user_status.status, type(user_status.status))   
                         break  
                     soni += 1       
-                    await asyncio.sleep(30)          
+                    await asyncio.sleep(28800)          
         
         elif int(malumot) == 0:
-            son = 1
+            son = 5
             while not ReadUserStatus(user_id, response): 
                 if son <= 3:
                     await bot.send_message(user_id, text="Siz hali to'lovni amalga oshirmadingiz. Iltimos, to'lov qiling!",
@@ -132,10 +132,10 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
                     await bot.send_message(user_id, "Ma'lumotlaringiz bekor qilindi.")
                     break
                 son += 1       
-                await asyncio.sleep(30)
+                await asyncio.sleep(28800)
         else:
             break        
-        await asyncio.sleep(100)  
+        await asyncio.sleep(2419200)  
 
 
 @dp.message(CommandStart())
@@ -327,7 +327,7 @@ async def Maqsad(call: CallbackQuery, state: FSMContext):
             reply_markup=CreateInline({"💵 To'lov qilish": f"tolov_qilish_{name}_{int(group)}"}, just=1))
         await state.set_state(Info.tolov)
         response = (AdminDb[6] if group == '1' else AdminDb[7] if group == '2' else AdminDb[8] if group == '3' else False)
-        await asyncio.sleep(20)
+        await asyncio.sleep(28800)
         if response:
             asyncio.create_task(EslatmaXabarYuborish(user_id, name, int(group), response))
         else:
