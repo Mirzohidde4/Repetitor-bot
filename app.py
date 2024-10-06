@@ -35,7 +35,7 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
                     if aziz[1] == int(user_id) and i[2] == int(response):
                         if aziz[5] >= 29: 
                             oy = datetime.now().month
-                            if (aziz[7] == 12) and (oy == 2):
+                            if (aziz[7] == 12) and (oy == 2): #tekshirilmagan
                                 try:
                                     UpdateOylik('status', False, aziz[1], aziz[2])
                                     UpdateOylik('narx', 100, aziz[1], aziz[2])
@@ -51,12 +51,24 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
                             else:
                                 print("Skidka")        
                         else:
-                            if aziz[5] <= 5:
+                            if (aziz[7] == 2) and (aziz[5] >= 27): #tekshirilmagan
+                                oy = datetime.now().month
+                                if (oy - aziz[7]) > 1:
+                                    try:
+                                        UpdateOylik('status', False, aziz[1], aziz[2])
+                                        UpdateOylik('narx', 100, aziz[1], aziz[2])
+                                    except Exception as e:
+                                        print(f"Xatolik: {e}")
+                                else:
+                                    print("Skidka") 
+
+                            elif aziz[5] <= 5:
                                 try:
                                     UpdateOylik('status', False, aziz[1], aziz[2])
                                     UpdateOylik('narx', 100, aziz[1], aziz[2])
                                 except Exception as e:
-                                    print(f"Xatolik: {e}")   
+                                    print(f"Xatolik: {e}")  
+
                             else:
                                 oylik_kunlar_soni = calendar.monthrange(today.year, today.month)[1]
                                 kunlar_soni = oylik_kunlar_soni - aziz[5]
