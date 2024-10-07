@@ -30,7 +30,7 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
 
         if int(malumot) == 1:
             today = datetime.now()
-            if today.day == 1: 
+            if today.day == 7: 
                 for aziz in ReadDb('Oylik'):
                     if aziz[1] == int(user_id) and i[2] == int(response):
                         if aziz[5] >= 29: 
@@ -51,15 +51,15 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
                             else:
                                 print("Skidka")        
                         else:
-                            if (aziz[7] == 2) and (aziz[5] >= 27): #tekshirilmagan
-                                oy = datetime.now().month
-                                if (oy - aziz[7]) > 1:
-                                    try:
-                                        UpdateOylik('status', False, aziz[1], aziz[2])
-                                        UpdateOylik('narx', 100, aziz[1], aziz[2])
-                                    except Exception as e:
-                                        print(f"Xatolik: {e}")
-                                else:
+                            if (aziz[7] == 2) and (aziz[5] >= 27):
+                                # oy = datetime.now().month
+                                # if (oy - aziz[7]) > 1:
+                                #     try:
+                                #         UpdateOylik('status', False, aziz[1], aziz[2])
+                                #         UpdateOylik('narx', 100, aziz[1], aziz[2])
+                                #     except Exception as e:
+                                #         print(f"Xatolik: {e}")
+                                # else:
                                     print("Skidka") 
 
                             elif aziz[5] <= 5:
@@ -92,7 +92,7 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
                                             else:
                                                 print(f"Sheets ozgartirishda xato: {response_sheets.status_code}")             
                 
-                soni = 5
+                soni = 1
                 while not ReadUserStatus(user_id, response):
                     if soni <= 3:
                         await bot.send_message(chat_id=user_id, text="Oylik to'lovni amalga oshiring", 
@@ -121,10 +121,10 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
                             print(user_status.status, type(user_status.status))   
                         break  
                     soni += 1       
-                    await asyncio.sleep(28800)          
+                    await asyncio.sleep(30)          
         
         elif int(malumot) == 0:
-            son = 5
+            son = 1
             while not ReadUserStatus(user_id, response): 
                 if son <= 3:
                     await bot.send_message(user_id, text="Siz hali to'lovni amalga oshirmadingiz. Iltimos, to'lov qiling!",
@@ -144,10 +144,10 @@ async def EslatmaXabarYuborish(user_id, name, response, group):
                     await bot.send_message(user_id, "Ma'lumotlaringiz bekor qilindi.")
                     break
                 son += 1       
-                await asyncio.sleep(28800)
+                await asyncio.sleep(30)
         else:
             break        
-        await asyncio.sleep(2419200)  
+        await asyncio.sleep(100)  
 
 
 @dp.message(CommandStart())
@@ -160,15 +160,16 @@ async def Start(message: Message, state: FSMContext):
         fulname = message.from_user.full_name
         job = True
         try:
-            response = requests.get(AdminDb[3] if referal[0] == '1' else AdminDb[4] if referal[0] == '2' else AdminDb[5] if referal[0] == '3' else False).json()
-            if response:
-                for i in response:
-                    if i['telegram id'] == str(user_id):
+            response = int(referal[0])
+            # response = requests.get(AdminDb[3] if referal[0] == '1' else AdminDb[4] if referal[0] == '2' else AdminDb[5] if referal[0] == '3' else False).json()
+            if ReadDb('Oylik'):
+                for i in ReadDb('Oylik'):
+                    if (i[1] == int(user_id)) and (i[2] == response):
                         await message.answer(text="😊 <b>Assalomu alaykum <b>Jalol Boltaevning</b> botiga xush kelibsiz.</b>")
                         job = False
                     break
         except Exception as e:
-            logging.info("Sheets o'qishda xatolik: ", e)    
+            print("User qidirishda xatolik: ", e)    
 
         if job:
             await message.answer(
@@ -176,7 +177,7 @@ async def Start(message: Message, state: FSMContext):
                     Assalomu alaykum, hurmatli <b>{fulname}</b>. Jalol Boltayevning onlayn kursida o'qimoqchimisiz? Men ustoz Jalol Boltayevning yordamchi botiman! 😎🤖
 Ism-familiya, telefon raqami kabi ba'zi ma'lumotlaringizni yozib olishim kerak. Bu juda qisqa vaqt oladi. Keyin sizga yopiq guruhning havolasini yuboraman.
                 """)
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.2)
             await message.answer(
                 text="""
                     Demak, boshladik.
@@ -238,7 +239,6 @@ async def QoshimchaRaqam(message: Message, state: FSMContext):
 async def EditBtn(call: CallbackQuery):
     checkbox_options[call.data] = not checkbox_options[call.data]
     await bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=GetCheckbox(checkbox_options))
-
 
 @dp.callback_query(F.data == "submit", Info.kasb)
 async def SubmitBtn(call: CallbackQuery, state: FSMContext):
@@ -339,7 +339,7 @@ async def Maqsad(call: CallbackQuery, state: FSMContext):
             reply_markup=CreateInline({"💵 To'lov qilish": f"tolov_qilish_{name}_{int(group)}"}, just=1))
         await state.set_state(Info.tolov)
         response = (AdminDb[6] if group == '1' else AdminDb[7] if group == '2' else AdminDb[8] if group == '3' else False)
-        await asyncio.sleep(28800)
+        await asyncio.sleep(30)
         if response:
             asyncio.create_task(EslatmaXabarYuborish(user_id, name, int(group), response))
         else:
