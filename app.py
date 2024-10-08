@@ -12,10 +12,10 @@ from states import Info, Pay
 from dt_baza import ReadDb, OylikStatus, UpdateOylik, ReadUserStatus, DeleteOylik
 
 
-AdminDb = ReadDb('Admin')[0]
-CardTable = ReadDb('Card')[0]
+AdminDb = ReadDb('main_admin')[0]
+CardTable = ReadDb('main_card')[0]
 logging.basicConfig(level=logging.INFO)
-bot = Bot(token=AdminDb[2], default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(token=AdminDb[7], default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 
 
@@ -162,9 +162,9 @@ async def Start(message: Message, state: FSMContext):
         try:
             response = int(referal[0])
             # response = requests.get(AdminDb[3] if referal[0] == '1' else AdminDb[4] if referal[0] == '2' else AdminDb[5] if referal[0] == '3' else False).json()
-            if ReadDb('Oylik'):
-                for i in ReadDb('Oylik'):
-                    if (i[1] == int(user_id)) and (i[2] == response):
+            if ReadDb('main_oylik'):
+                for i in ReadDb('main_oylik'):
+                    if (i[2] == int(user_id)) and (i[3] == response):
                         await message.answer(text="😊 <b>Assalomu alaykum <b>Jalol Boltaevning</b> botiga xush kelibsiz.</b>")
                         job = False
                     break
@@ -289,7 +289,7 @@ async def EditButton(call: CallbackQuery):
     await bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=GetCheckbox(variants))
 
 
-@dp.callback_query(F.data == "submit", Info.maqsad)
+@dp.callback_query(F.data == "submit", Info.maqsad) # yangilanmagan
 async def Maqsad(call: CallbackQuery, state: FSMContext):
     selected_options = [option for option, is_selected in variants.items() if is_selected]
     
@@ -357,12 +357,12 @@ async def Tolov(call: CallbackQuery, state: FSMContext):
     await state.update_data({'userpay': user, 'sheetgroup': gr})
 
     if action == 'qilish':
-        if ReadDb('Oylik'):
-            for member in ReadDb('Oylik'):
-                if (member[1] == user_id) and (member[2] == int(gr)):
-                    if member[3] == 0:
-                        await call.message.answer_photo(photo=CardTable[0], 
-                            caption=f"{CardTable[2]}: {CardTable[1]}\n\nTo'lovni amalga oshirib, chekini yuboring! (skrinshot yuborsangiz ham bo'ladi). Kurs narxi <b>{member[4]} 000</b> so'm.")
+        if ReadDb('main_ylik'):
+            for member in ReadDb('main_ylik'):
+                if (member[2] == user_id) and (member[3] == int(gr)):
+                    if member[8] == 0:
+                        await call.message.answer_photo(photo=CardTable[1], 
+                            caption=f"{CardTable[3]}: {CardTable[2]}\n\nTo'lovni amalga oshirib, chekini yuboring! (skrinshot yuborsangiz ham bo'ladi). Kurs narxi <b>{member[4]} 000</b> so'm.")
                         await state.set_state(Pay.screen)
                     else:
                         await call.message.answer(text="Siz bu oy uchun to'lov qilgansiz.")
@@ -381,31 +381,31 @@ async def Screenshot(message: Message, state: FSMContext):
     today = datetime.now()
 
     if message.photo:
-        if ReadDb('Oylik'):
-            for member in ReadDb('Oylik'):
-                if (member[1] == user_id) and (member[2] == int(sheetgroup)):
+        if ReadDb('main_ylik'):
+            for member in ReadDb('main_ylik'):
+                if (member[2] == user_id) and (member[3] == int(sheetgroup)):
                     sendpay = await message.answer(text="Rahmat! To'lovingiz Jalol Boltayevga yuborildi. Jalol Boltayev to'lovni tasdiqlagach, sizga guruh linkini yuboraman! Havotir olmang! To'lovingiz tez orada tasdiqlanadi (bu 10 daqiqadan 6 soatgacha vaqt olishi mumkin. Jalol ustoz ishda bo'lsalar kechroq tasdiqlab yuboradi).")
                     await bot.send_photo(
-                        chat_id=AdminDb[0], photo=message.photo[-1].file_id, caption=f"<b>{user}</b> kurs to'lovini amalga oshirdi.\nQabul qilasizmi?",
+                        chat_id=AdminDb[1], photo=message.photo[-1].file_id, caption=f"<b>{user}</b> kurs to'lovini amalga oshirdi.\nQabul qilasizmi?",
                         reply_markup=CreateInline({"✅ Ha": f'qabul_xa_{user_id}_{sheetgroup}_{sendpay.message_id}_{today.day}', "❌ Yo'q": f'qabul_yoq_{user_id}_{sheetgroup}_{sendpay.message_id}_{today.day}'}, just=2))
         else:
             await message.answer(text="Siz ro'yhatdan o'tmagansiz.")    
     
     elif message.document:
         if message.document.mime_type in ("application/pdf", "image/jpeg", "image/png"):        
-            if ReadDb('Oylik'): 
-                for member in ReadDb('Oylik'):
-                    if (member[1] == user_id) and (member[2] == int(sheetgroup)):
+            if ReadDb('main_oylik'): 
+                for member in ReadDb('main_oylik'):
+                    if (member[2] == user_id) and (member[3] == int(sheetgroup)):
                         sendpay = await message.answer(text="Rahmat! To'lovingiz Jalol Boltayevga yuborildi. Jalol Boltayev to'lovni tasdiqlagach, sizga guruh linkini yuboraman! Havotir olmang! To'lovingiz tez orada tasdiqlanadi (bu 10 daqiqadan 6 soatgacha vaqt olishi mumkin. Jalol ustoz ishda bo'lsalar kechroq tasdiqlab yuboradi).")
-                        await bot.send_document(chat_id=AdminDb[0], document=f"{message.document.file_id}", caption=f"<b>{user}</b> kurs to'lovini amalga oshirdi.\nQabul qilasizmi?",
+                        await bot.send_document(chat_id=AdminDb[1], document=f"{message.document.file_id}", caption=f"<b>{user}</b> kurs to'lovini amalga oshirdi.\nQabul qilasizmi?",
                             reply_markup=CreateInline({"✅ Ha": f'qabul_xa_{user_id}_{sheetgroup}_{sendpay.message_id}_{today.day}', "❌ Yo'q": f'qabul_yoq_{user_id}_{sheetgroup}_{sendpay.message_id}_{today.day}'}, just=2))
     
     else:
-        await message.answer_photo(photo=CardTable[0],caption=f"{CardTable[2]}: {CardTable[1]}\n\nTo'lovni amalga oshirib screenshotini yuboring.")
+        await message.answer_photo(photo=CardTable[1],caption=f"{CardTable[3]}: {CardTable[2]}\n\nTo'lovni amalga oshirib screenshotini yuboring.")
         await state.set_state(Pay.screen)    
 
 
-@dp.callback_query(F.data.startswith('qabul_'))
+@dp.callback_query(F.data.startswith('qabul_'))  # yangilanmagan
 async def Accept(call: CallbackQuery, state: FSMContext):
     action = call.data.split('_')[1]
     user_id = call.data.split('_')[2]
@@ -462,15 +462,15 @@ async def Accept(call: CallbackQuery, state: FSMContext):
 async def NewMember(message: Message):
     new_members = message.new_chat_members
     group = message.chat.id
-    response = (1 if group == AdminDb[6] else 2 if group == AdminDb[7] else 3 if group == AdminDb[8] else False)    
+    response = (1 if group == AdminDb[3] else 2 if group == AdminDb[4] else 3 if group == AdminDb[5] else False)    
     
     for member in new_members:
         await message.delete()
         user_id = member.id
         action = True
-        if ReadDb('Oylik'):
-            for user in ReadDb('Oylik'):
-                if (user[1] == user_id) and (user[2] == response): 
+        if ReadDb('main_oylik'):
+            for user in ReadDb('main_oylik'):
+                if (user[2] == user_id) and (user[3] == response): 
                     action = False
 
         if action:  
@@ -490,17 +490,17 @@ async def LeftMember(message: Message):
         user_id = message.left_chat_member.id
         user_url = message.left_chat_member.url
         group_id = message.chat.id
-        response = (1 if group_id == AdminDb[6] else 2 if group_id== AdminDb[7] else 3 if group_id == AdminDb[8] else False)
+        response = (1 if group_id == AdminDb[3] else 2 if group_id== AdminDb[4] else 3 if group_id == AdminDb[5] else False)
 
-        if ReadDb('Oylik'):
-            for user in ReadDb('Oylik'):
-                if (user[1] == user_id) and (user[2] == response):
-                    await bot.send_message(chat_id=AdminDb[0], text=f"Foydalanuvchi <a href='{user_url}'><b>{user[0]}</b></a> {response}-guruhni tark etdi. Ma'lumotlarini tozalaymi?",
+        if ReadDb('main_oylik'):
+            for user in ReadDb('main_oylik'):
+                if (user[2] == user_id) and (user[3] == response):
+                    await bot.send_message(chat_id=AdminDb[1], text=f"Foydalanuvchi <a href='{user_url}'><b>{user[0]}</b></a> {response}-guruhni tark etdi. Ma'lumotlarini tozalaymi?",
                     reply_markup=CreateInline({"✅ Xa": f"tozalash_xa_{user_id}_{response}", "❌ Yo'q": f"tozalash_yoq_{user_id}_{response}"}, just=2))
         await message.delete()
 
 
-@dp.callback_query(F.data.startswith('tozalash_'))
+@dp.callback_query(F.data.startswith('tozalash_')) # yangilanmadi
 async def Tozalash(call: CallbackQuery):
     action = call.data.split('_')[1]
     user_id = call.data.split('_')[2]

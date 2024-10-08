@@ -3,7 +3,7 @@ import sqlite3, requests
 
 def sql_connect():
     try:
-        connection = sqlite3.connect("db.sqlite3")  # SQLite3 bazasiga bog'lanish
+        connection = sqlite3.connect("./db.sqlite3")  # SQLite3 bazasiga bog'lanish
         connection.commit()
         return True
     except sqlite3.Error as e:
@@ -12,110 +12,9 @@ def sql_connect():
 
 
 def sql_connection():
-    connection = sqlite3.connect("db.sqlite3")  # SQLite3 bazasiga bog'lanish
+    connection = sqlite3.connect("./db.sqlite3")  # SQLite3 bazasiga bog'lanish
     connection.commit()
     return connection
-
-
-def CreateTableAPI():
-    if sql_connect() == True:
-        conn = sql_connection()
-        cursor = conn.cursor()
-        create_table = """ CREATE TABLE Admin (
-                id BIGINT NOT NULL,
-                username TEXT NOT NULL,
-                token TEXT NOT NULL,
-                api_1 TEXT NOT NULL,
-                api_2 TEXT NOT NULL,
-                api_3 TEXT NOT NULL,
-                group_1 BIGINT NOT NULL,
-                group_2 BIGINT NOT NULL,
-                group_3 BIGINT NOT NULL,
-                price INTEGER NOT NULL
-            ); """
-        cursor.execute(create_table)
-        conn.commit()
-    else:
-        return False  
-
-
-def CreateTableCard():
-    if sql_connect() == True:
-        conn = sql_connection()
-        cursor = conn.cursor()
-        create_table = """ CREATE TABLE Card (
-                photo TEXT NOT NULL,
-                number BIGINT NOT NULL,
-                username TEXT NOT NULL
-            ); """
-        cursor.execute(create_table)
-        conn.commit()
-    else:
-        return False  
-
-
-def CreateTableBool():
-    if sql_connect() == True:
-        conn = sql_connection()
-        cursor = conn.cursor()
-        create_table = """ CREATE TABLE Oylik (
-                user TEXT NOT NULL,
-                user_id BIGINT NOT NULL,
-                gruppa INTEGER NOT NULL,
-                status BOOLEAN NOT NULL,
-                narx INTEGER NOT NULL,
-                sana INTEGER NOT NULL,
-                malumot BOOLEAN NOT NULL,
-                oy INTEGER NOT NULL
-            ); """
-        cursor.execute(create_table)
-        conn.commit()
-    else:
-        return False  
-
-
-def Admin(id, username, token, api_1, api_2, api_3, group_1, group_2, group_3, price):
-    if sql_connect() == True:
-        try:
-            conn = sql_connection()
-            cursor = conn.cursor()
-
-            cursor.execute(
-                """INSERT INTO Admin (id, username, token, api_1, api_2, api_3, group_1, group_2, group_3, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (id, username, token, api_1, api_2, api_3, group_1, group_2, group_3, price),
-            )
-            conn.commit()
-            return True
-        except sqlite3.Error as e:
-            print(f"SQLite error: {e}")
-            return False
-        finally:
-            conn.close()
-    else:
-        return False
-# Admin(795303467, 'https://t.me/xudoybergan0v', '6842270549:AAEVq-VSV96HcbKmrHuTWwqIB-d4Q2cbUZQ', 'https://sheetdb.io/api/v1/6l88e9ljvile7', 'https://sheetdb.io/api/v1/y2cl3rwvjwc9e', 'https://sheetdb.io/api/v1/y2cl3rwvjwc9e', -4504435403, -4579819207, -4591173539, 100)
-    
-
-def AdminCard(photo, number, name):
-    if sql_connect() == True:
-        try:
-            conn = sql_connection()
-            cursor = conn.cursor()
-
-            cursor.execute(
-                """INSERT INTO Card (photo, number, username) VALUES (?, ?, ?)""",
-                (photo, number, name),
-            )
-            conn.commit()
-            return True
-        except sqlite3.Error as e:
-            print(f"SQLite error: {e}")
-            return False
-        finally:
-            conn.close()
-    else:
-        return False
-# AdminCard('https://avatars.mds.yandex.net/i?id=bdb3d43628f5588e30bbb991bf9fb01eb5e08d61-5666974-images-thumbs&n=13', 1111222233334444, 'Mirzohid')
 
 
 def OylikStatus(user, user_id, gruppa, status, narx, sana, malumot, oy):
@@ -125,7 +24,7 @@ def OylikStatus(user, user_id, gruppa, status, narx, sana, malumot, oy):
             cursor = conn.cursor()
 
             cursor.execute(
-                """INSERT INTO Oylik (user, user_id, gruppa, status, narx, sana, malumot, oy) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                """INSERT INTO main_oylik (user, user_id, gruppa, status, narx, date, info, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
                 (user, user_id, gruppa, status, narx, sana, malumot, oy),
             )
             conn.commit()
@@ -155,13 +54,15 @@ def ReadDb(table):
             return l
     else:
         return False
+for i in ReadDb('main_admin'):
+    print(i)    
 
 
 def ReadUserStatus(user_id, gruppa):
     if sql_connect() == True:
         conn = sql_connection()
         cursor = conn.cursor()
-        cursor.execute(f"SELECT status FROM Oylik WHERE user_id = ? AND gruppa = ?", (user_id, gruppa))
+        cursor.execute(f"SELECT status FROM main_oylik WHERE user_id = ? AND gruppa = ?", (user_id, gruppa))
 
         res = cursor.fetchone()
         conn.close()
@@ -171,9 +72,9 @@ def ReadUserStatus(user_id, gruppa):
 
 def UpdateOylik(argument, status, user_id, group):
     try:
-        with sqlite3.connect("db.sqlite3") as con:
+        with sqlite3.connect("../db.sqlite3") as con:
             cur = con.cursor()
-            cur.execute(f"UPDATE Oylik SET {argument} = ? WHERE user_id = ? AND gruppa = ?", (status, user_id, group))
+            cur.execute(f"UPDATE main_oylik SET {argument} = ? WHERE user_id = ? AND gruppa = ?", (status, user_id, group))
             con.commit()
             print(f"Updated {argument} for user_id: {user_id} in group: {group}")  # Logging
             return True
@@ -190,7 +91,7 @@ def DeleteOylik(userid, gruppa):
         try:
             conn = sql_connection()
             cursor = conn.cursor()
-            query = "DELETE FROM Oylik WHERE user_id = ? AND gruppa = ?"
+            query = "DELETE FROM main_oylik WHERE user_id = ? AND gruppa = ?"
             cursor.execute(query, (userid, gruppa))
             conn.commit()
             return True
@@ -203,4 +104,105 @@ def DeleteOylik(userid, gruppa):
     return False
 
 
+
+
     
+# def CreateTableAPI():
+#     if sql_connect() == True:
+#         conn = sql_connection()
+#         cursor = conn.cursor()
+#         create_table = """ CREATE TABLE Admin (
+#                 id BIGINT NOT NULL,
+#                 username TEXT NOT NULL,
+#                 token TEXT NOT NULL,
+#                 api_1 TEXT NOT NULL,
+#                 api_2 TEXT NOT NULL,
+#                 api_3 TEXT NOT NULL,
+#                 group_1 BIGINT NOT NULL,
+#                 group_2 BIGINT NOT NULL,
+#                 group_3 BIGINT NOT NULL,
+#                 price INTEGER NOT NULL
+#             ); """
+#         cursor.execute(create_table)
+#         conn.commit()
+#     else:
+#         return False  
+
+
+# def CreateTableCard():
+#     if sql_connect() == True:
+#         conn = sql_connection()
+#         cursor = conn.cursor()
+#         create_table = """ CREATE TABLE Card (
+#                 photo TEXT NOT NULL,
+#                 number BIGINT NOT NULL,
+#                 username TEXT NOT NULL
+#             ); """
+#         cursor.execute(create_table)
+#         conn.commit()
+#     else:
+#         return False  
+
+
+# def CreateTableBool():
+#     if sql_connect() == True:
+#         conn = sql_connection()
+#         cursor = conn.cursor()
+#         create_table = """ CREATE TABLE Oylik (
+#                 user TEXT NOT NULL,
+#                 user_id BIGINT NOT NULL,
+#                 gruppa INTEGER NOT NULL,
+#                 status BOOLEAN NOT NULL,
+#                 narx INTEGER NOT NULL,
+#                 sana INTEGER NOT NULL,
+#                 malumot BOOLEAN NOT NULL,
+#                 oy INTEGER NOT NULL
+#             ); """
+#         cursor.execute(create_table)
+#         conn.commit()
+#     else:
+#         return False  
+# 
+# 
+# def Admin(id, username, token, api_1, api_2, api_3, group_1, group_2, group_3, price):
+#     if sql_connect() == True:
+#         try:
+#             conn = sql_connection()
+#             cursor = conn.cursor()
+
+#             cursor.execute(
+#                 """INSERT INTO Admin (id, username, token, api_1, api_2, api_3, group_1, group_2, group_3, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+#                 (id, username, token, api_1, api_2, api_3, group_1, group_2, group_3, price),
+#             )
+#             conn.commit()
+#             return True
+#         except sqlite3.Error as e:
+#             print(f"SQLite error: {e}")
+#             return False
+#         finally:
+#             conn.close()
+#     else:
+#         return False
+# Admin(795303467, 'https://t.me/xudoybergan0v', '6842270549:AAEVq-VSV96HcbKmrHuTWwqIB-d4Q2cbUZQ', 'https://sheetdb.io/api/v1/6l88e9ljvile7', 'https://sheetdb.io/api/v1/y2cl3rwvjwc9e', 'https://sheetdb.io/api/v1/y2cl3rwvjwc9e', -4504435403, -4579819207, -4591173539, 100)
+
+
+# def AdminCard(photo, number, name):
+#     if sql_connect() == True:
+#         try:
+#             conn = sql_connection()
+#             cursor = conn.cursor()
+
+#             cursor.execute(
+#                 """INSERT INTO Card (photo, number, username) VALUES (?, ?, ?)""",
+#                 (photo, number, name),
+#             )
+#             conn.commit()
+#             return True
+#         except sqlite3.Error as e:
+#             print(f"SQLite error: {e}")
+#             return False
+#         finally:
+#             conn.close()
+#     else:
+#         return False
+# AdminCard('https://avatars.mds.yandex.net/i?id=bdb3d43628f5588e30bbb991bf9fb01eb5e08d61-5666974-images-thumbs&n=13', 1111222233334444, 'Mirzohid')
